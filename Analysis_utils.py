@@ -9,8 +9,8 @@ import os
 def calculate_features(image, contour):
     
     # Calculate area and perimeter
-    area = cv2.contourArea(contour)
-    perimeter = cv2.arcLength(contour, True)
+    area = cv2.contourArea(contour)  #in micron
+    perimeter = cv2.arcLength(contour, True) #in micron
 
     # Calculate circularity
     circularity = (4 * np.pi * area) / (perimeter ** 2) if perimeter > 0 else 0
@@ -26,8 +26,8 @@ def calculate_features(image, contour):
     mean_intensity = cv2.mean(image, mask=mask)[0]
 
     # Calculate solidity (area / convex hull area)
-    hull = cv2.convexHull(contour)
-    hull_area = cv2.contourArea(hull)
+    hull = cv2.convexHull(contour)  #in micron
+    hull_area = cv2.contourArea(hull) 
     solidity = area / hull_area if hull_area > 0 else 0
 
     return area, perimeter, circularity, deformation, solidity, mean_intensity
@@ -81,7 +81,7 @@ def plot_boxplot_with_scatter(data, variable, subplot_index, num_rows):
     plt.subplot(num_rows, 1, subplot_index)
     sns.boxplot(x='Dataset', y=variable, data=data, palette="Set3")
     sns.stripplot(x='Dataset', y=variable, data=data, color='black', alpha=0.5)
-    plt.title(f'{variable} - Mean and Standard Deviation by Dataset')
+    plt.title(f'{variable} - Mean and Standard Deviation')
     plt.ylabel(variable)
     plt.xlabel('Dataset')
     
@@ -107,7 +107,7 @@ def plot_distribution_side_by_side(data_a, data_b, variable, title_a, title_b, n
     for dataset in data_a['Dataset'].unique():
         sns.histplot(data_a[data_a['Dataset'] == dataset][variable], kde=True, label=dataset, stat='density')
     plt.title(title_a)
-    plt.xlabel(variable)
+    plt.xlabel(f'{variable}')
     plt.ylabel('Density')
     plt.legend()
 
@@ -116,7 +116,7 @@ def plot_distribution_side_by_side(data_a, data_b, variable, title_a, title_b, n
     for dataset in data_b['Dataset'].unique():
         sns.histplot(data_b[data_b['Dataset'] == dataset][variable], kde=True, label=dataset, stat='density')
     plt.title(title_b)
-    plt.xlabel(variable)
+    plt.xlabel(f'{variable}')
     plt.ylabel('Density')
     plt.legend()
     
@@ -129,7 +129,7 @@ def plot_boxplots_side_by_side(data_a, data_b, variable, title_a, title_b, num_r
     sns.stripplot(x='Dataset', y=variable, data=data_a, color='black', alpha=0.5)
     plt.title(title_a)
     plt.xlabel('Dataset')
-    plt.ylabel(variable)
+    plt.ylabel(f'{variable}')
 
     # Box plot for Cell B
     plt.subplot(num_rows, num_cols, subplot_index + 1)
@@ -137,7 +137,7 @@ def plot_boxplots_side_by_side(data_a, data_b, variable, title_a, title_b, num_r
     sns.stripplot(x='Dataset', y=variable, data=data_b, color='black', alpha=0.5)
     plt.title(title_b)
     plt.xlabel('Dataset')
-    plt.ylabel(variable)
+    plt.ylabel(f'{variable}')
 
 
 
@@ -201,3 +201,55 @@ def plot_extreme_values_frames(dataframe, feature, dataset_name, segmentation_di
     plt.suptitle(f'Extremes for {feature} - {dataset_name}', fontsize=16)
     plt.tight_layout()
     plt.show()
+    
+def plot_scatter_matrix(data, metrics):
+    plt.figure(figsize=(15, 15))
+    plot_count = 1
+    for i in range(len(metrics)):
+        for j in range(i+1, len(metrics)):
+            metric1, metric2 = metrics[i], metrics[j]
+
+            plt.subplot(len(metrics)-1, len(metrics)-1, plot_count)
+            plot_count += 1
+
+            for label, df in data.items():
+                sns.scatterplot(x=df[metric1], y=df[metric2], label=label)
+
+            plt.xlabel(metric1)
+            plt.ylabel(metric2)
+            plt.title(f"{metric1} vs {metric2}")
+
+    plt.tight_layout()
+    plt.show()
+    
+    
+def plot_scatter_matrix_mean(data, metrics):
+    plt.figure(figsize=(15, 15))
+    plot_count = 1
+    for i in range(len(metrics)):
+        for j in range(i+1, len(metrics)):
+            metric1, metric2 = metrics[i], metrics[j]
+
+            plt.subplot(len(metrics)-1, len(metrics)-1, plot_count)
+            plot_count += 1
+
+            for label, df in data.items():
+                # Calculate the mean (or central point) for each metric
+                mean_x = df[metric1].mean()
+                mean_y = df[metric2].mean()
+
+                # Plot the mean point for each dataset
+                plt.scatter(mean_x, mean_y, label=f"{label} Mean", s=100, edgecolor='black')
+
+            plt.xlabel(metric1)
+            plt.ylabel(metric2)
+            plt.title(f"{metric1} vs {metric2}")
+            plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+    
+    
+    
+    
+  

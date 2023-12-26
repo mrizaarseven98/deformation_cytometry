@@ -248,6 +248,37 @@ def plot_scatter_matrix_mean(data, metrics):
 
     plt.tight_layout()
     plt.show()
+
+#function to convert pixels to micrometers
+def convert_pixels_to_micrometers(pixels):
+    # Assuming each pixel corresponds to a 10x10 micrometer square and considering a x30 magnification
+    micrometers = pixels * (10/30)**2 
+    return micrometers
+
+#function to compare two columns of the CSV file
+def plot_csv_columns(csv_files, x_column, y_column, labels):
+    plt.figure(figsize=(10, 6))
+
+    for i, csv_file in enumerate(csv_files):
+        # Read CSV file into a DataFrame
+        df = pd.read_csv(csv_file)
+
+        # Convert the first column data from pixels to micrometers
+        df[x_column] = convert_pixels_to_micrometers(df[x_column])
+
+        # Extract columns
+        x_values = df[x_column]
+        y_values = df[y_column]
+
+        # Plot the data with labels
+        plt.scatter(x_values, y_values, alpha=0.5, label=labels[i])
+
+    plt.title(f'{y_column} vs {x_column}')
+    plt.xlabel(f'{x_column} (\u03bcm²)')
+    plt.ylabel(y_column)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
     
     
     
